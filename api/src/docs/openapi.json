@@ -1,0 +1,1120 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Beach Forecast",
+    "version": "1.0.0",
+    "description": "This is an api that provides beach predictions. You can register your favorite beaches and receive forecasts for each one. And the coolest thing, the api has an algorithm that uses the predictions of each beach to make an evaluation, that way you can know the best beach to go surfing at the moment!",
+    "contact": {
+      "email": "lucas.trabalho7.ls@gmail.com",
+      "name": "Beach Forecast"
+    },
+    "license": {
+      "name": "MIT License",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "users",
+      "description": "users routes"
+    },
+    {
+      "name": "authentication",
+      "description": "Authentication routes"
+    },
+    {
+      "name": "beaches",
+      "description": "Beaches routes"
+    },
+    {
+      "name": "forecasts",
+      "description": "Forecast route"
+    }
+  ],
+  "paths": {
+    "/users": {
+      "post": {
+        "summary": "Create user",
+        "description": "This route is responsible for creating the user and saving it to the database.",
+        "operationId": "create-user",
+        "requestBody": {
+          "description": "This data will be used to create the user in the database.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "$ref": "#/components/schemas/username"
+                  },
+                  "email": {
+                    "$ref": "#/components/schemas/email"
+                  },
+                  "password": {
+                    "$ref": "#/components/schemas/password"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Occurs when a user is successfully created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Occurs when data that needs to be unique has already been registered.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "emailAlreadyRegistered": {
+                    "summary": "email already registered",
+                    "description": "This error occurs when the email provided has already been registered in the database.",
+                    "value": {
+                      "message": "email already registered",
+                      "code": 409,
+                      "error": "Conflict"
+                    }
+                  },
+                  "usernameAlreadyRegistered": {
+                    "summary": "username already registered",
+                    "description": "This error occurs when the username provided has already been registered in the database.",
+                    "value": {
+                      "message": "username already registered",
+                      "code": 409,
+                      "error": "Conflict"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Occurs when data is invalid or not provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalidEmail": {
+                    "summary": "invalid email",
+                    "description": "This error occurs when the email provided has an invalid format.",
+                    "value": {
+                      "message": "Email is invalid",
+                      "code": 422,
+                      "error": "Unprocessable Entity"
+                    }
+                  },
+                  "shortPassword": {
+                    "summary": "short password",
+                    "description": "This error occurs when the password provided is too short.",
+                    "value": {
+                      "message": "Password must be at least 6 characters long",
+                      "code": 422,
+                      "error": "Unprocessable Entity"
+                    }
+                  },
+                  "longPassword": {
+                    "summary": "long password",
+                    "description": "This error occurs when the password provided is too long.",
+                    "value": {
+                      "message": "Password must be a maximum of 20 characters",
+                      "code": 422,
+                      "error": "Unprocessable Entity"
+                    }
+                  },
+                  "invalidUsername": {
+                    "summary": "invalid username",
+                    "description": "This error occurs when the given username has an invalid format.",
+                    "value": {
+                      "message": "Username is invalid",
+                      "code": 422,
+                      "error": "Unprocessable Entity"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      },
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Hard delete user",
+        "description": "This route is responsible for permanently deleting a user, along with all your data.",
+        "operationId": "hard-delete-user",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "password",
+            "required": true,
+            "description": "The user must verify his password before deleting the account. This serves as a layer of security.",
+            "schema": {
+              "$ref": "#/components/schemas/password"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Occurs when the user is successfully deleted."
+          },
+          "400": {
+            "description": "Occurs when the request is incorrect.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "missingPassword": {
+                    "summary": "password is missing",
+                    "description": "This error occurs when the \"password\" property is not provided in the request header.",
+                    "value": {
+                      "message": "password is missing",
+                      "code": 400,
+                      "error": "Bad Request"
+                    }
+                  },
+                  "incorrectPassword": {
+                    "summary": "password is incorrect",
+                    "description": "This error occurs when the password provided is different from the password created by the user.",
+                    "value": {
+                      "message": "password is incorrect",
+                      "code": 400,
+                      "error": "Bad Request"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthenticationError"
+          },
+          "404": {
+            "$ref": "#/components/responses/UserNotFound"
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/me": {
+      "summary": "Get authenticated user data",
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get authenticated user data",
+        "description": "This route is responsible for returning authenticated user data using a jwt. This jwt is passed in the authorization field in Bearer token format.",
+        "operationId": "user-me",
+        "responses": {
+          "200": {
+            "description": "Occurs when the user is successfully returned.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthenticationError"
+          },
+          "404": {
+            "$ref": "#/components/responses/UserNotFound"
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/username": {
+      "patch": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update username",
+        "description": "This route is responsible for updating a user's username.",
+        "operationId": "update-username",
+        "requestBody": {
+          "description": "tete",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "newUsername": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/username"
+                      },
+                      {
+                        "example": "john_doe_02"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Occurs when the user with the new username is successfully returned.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthenticationError"
+          },
+          "404": {
+            "$ref": "#/components/responses/UserNotFound"
+          },
+          "409": {
+            "description": "occurs when the username provided has already been registered in the database.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "username already registered",
+                  "code": 409,
+                  "error": "Conflict"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Occurs when the new username has an invalid format.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Username is invalid",
+                  "code": 422,
+                  "error": "Unprocessable Entity"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/password": {
+      "patch": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update user password",
+        "description": "This route is responsible for updating a user's password.",
+        "operationId": "update-password",
+        "requestBody": {
+          "description": "The request body must contain the new password and the current password. The current password will be used as validation.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "currentPassword": {
+                    "$ref": "#/components/schemas/password"
+                  },
+                  "newPassword": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/password"
+                      },
+                      {
+                        "example": 123456
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Occurs when the password has been successfully updated."
+          },
+          "400": {
+            "description": "Occurs when the current password is incorrect.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "current password is incorrect",
+                  "code": 400,
+                  "error": "Bad Request"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthenticationError"
+          },
+          "404": {
+            "$ref": "#/components/responses/UserNotFound"
+          },
+          "422": {
+            "description": "Occurs when the new password has an incorrect format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "shortPassword": {
+                    "summary": "short password",
+                    "description": "This error occurs when the password provided is too short.",
+                    "value": {
+                      "message": "Password must be at least 6 characters long",
+                      "code": 422,
+                      "error": "Unprocessable Entity"
+                    }
+                  },
+                  "longPassword": {
+                    "summary": "long password",
+                    "description": "This error occurs when the password provided is too long.",
+                    "value": {
+                      "message": "Password must be a maximum of 20 characters",
+                      "code": 422,
+                      "error": "Unprocessable Entity"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/refreshtoken": {
+      "summary": "Refresh Access Token",
+      "get": {
+        "security": [
+          {
+            "refreshToken": []
+          }
+        ],
+        "summary": "Generate a new access token",
+        "description": "This route is responsible for generating a new access token for the user without having to sign in again.",
+        "operationId": "refresh-token",
+        "responses": {
+          "200": {
+            "description": "Occurs when the new access token is successfully returned.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accessToken": {
+                      "$ref": "#/components/schemas/accessToken"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthenticationError"
+          },
+          "404": {
+            "$ref": "#/components/responses/UserNotFound"
+          }
+        },
+        "tags": [
+          "authentication"
+        ]
+      }
+    },
+    "/signin": {
+      "summary": "Responsible for the user login process.",
+      "post": {
+        "summary": "Authenticate the user in the api",
+        "description": "This route is responsible for authenticating the user to the api, generating an access token and a refresh token.",
+        "operationId": "signin",
+        "requestBody": {
+          "description": "The request body must contain the user's email and password.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "$ref": "#/components/schemas/email"
+                  },
+                  "password": {
+                    "$ref": "#/components/schemas/password"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Occurs when the user is successfully authenticated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accessToken": {
+                      "$ref": "#/components/schemas/accessToken"
+                    },
+                    "refreshToken": {
+                      "$ref": "#/components/schemas/refreshToken"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Occurs when the password or email provided is incorrect.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "email or password incorrect",
+                  "code": 401,
+                  "error": "Unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "authentication"
+        ]
+      }
+    },
+    "/beaches": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Register a beach",
+        "description": "This route is responsible for registering a beach for the user.",
+        "operationId": "register-beach",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/createBeach"
+        },
+        "responses": {
+          "201": {
+            "description": "The beach was created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Beach"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthenticationError"
+          },
+          "404": {
+            "$ref": "#/components/responses/UserNotFound"
+          },
+          "409": {
+            "description": "Occurs when the user has already registered a beach with the same name or latitude and longitude.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "sameName": {
+                    "summary": "beaches with same name",
+                    "description": "Occurs when the user has already registered a beach with the same name.",
+                    "value": {
+                      "message": "a beach with the same name has already been registered",
+                      "code": 409,
+                      "error": "Conflict"
+                    }
+                  },
+                  "sameLatAndLng": {
+                    "summary": "beaches with same lat and lng",
+                    "description": "Occurs when the user has already registered a beach with the same latitude and longitude.",
+                    "value": {
+                      "message": "a beach with the same lat and lng has already been registered",
+                      "code": 409,
+                      "error": "Conflict"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "beaches"
+        ]
+      },
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get all user beaches",
+        "description": "This route is responsible for returning all beaches that belong to a user.",
+        "operationId": "get-all-user-beaches",
+        "responses": {
+          "200": {
+            "description": "All user beaches were successfully returned.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Beach"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthenticationError"
+          }
+        },
+        "tags": [
+          "beaches"
+        ]
+      }
+    },
+    "/beaches/{id}": {
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get one user's beach",
+        "description": "This route is responsible for returning a user-specific beach through its id.",
+        "operationId": "get-one-user-beach",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/beachId"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The beach was returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Beach"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthenticationError"
+          },
+          "404": {
+            "$ref": "#/components/responses/BeachNotFound"
+          }
+        },
+        "tags": [
+          "beaches"
+        ]
+      },
+      "put": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update beach",
+        "description": "This route is responsible for updating the data of a beach.",
+        "operationId": "update-beach",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/beachId"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/createBeach"
+        },
+        "responses": {
+          "200": {
+            "description": "The beach has been successfully updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Beach"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthenticationError"
+          },
+          "404": {
+            "$ref": "#/components/responses/BeachNotFound"
+          }
+        },
+        "tags": [
+          "beaches"
+        ]
+      },
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete a beach",
+        "description": "This route is responsible for deleting a user's beach.",
+        "operationId": "delete-beach",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/beachId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The beach was successfully deleted."
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthenticationError"
+          },
+          "404": {
+            "$ref": "#/components/responses/BeachNotFound"
+          }
+        },
+        "tags": [
+          "beaches"
+        ]
+      }
+    },
+    "/forecasts": {
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get forecasts",
+        "description": "This route is responsible for returning the forecasts of all beaches registered by the user.",
+        "operationId": "beach-forecasts",
+        "responses": {
+          "200": {
+            "description": "Forecasts were returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forecasts"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthenticationError"
+          }
+        },
+        "tags": [
+          "forecasts"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "username": {
+        "type": "string",
+        "example": "john_doe",
+        "description": "Must contain only letters, numbers and underscores"
+      },
+      "email": {
+        "type": "string",
+        "example": "doe@mail.com"
+      },
+      "password": {
+        "type": "string",
+        "example": "123456@Doe",
+        "description": "must be between 6 and 20 chars"
+      },
+      "id": {
+        "type": "string",
+        "example": "b287a001-44df-4058-b80b-4a926487c80d",
+        "description": "uuid version 4 format"
+      },
+      "createdAt": {
+        "type": "string",
+        "example": "2022-10-16T18:08:40.483Z"
+      },
+      "accessToken": {
+        "type": "string",
+        "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6ImF0LUpXVCJ9.eyJ1c2VybmFtZSI6InN1YXJlc18wMSIsImVtYWlsIjoic3VhcmVzXzAxQG1haWwuY29tIiwiaWF0IjoxNjY2MzkwNDgzLCJleHAiOjE2NjYzOTQwODMsImF1ZCI6ImFwaS11cmwiLCJpc3MiOiJCZWFjaEZvcmVjYXN0LkFQSSIsInN1YiI6ImIyODdhMDAxLTQ0ZGYtNDA1OC1iODBiLTRhOTI2NDg3YzgwZCJ9.7lv0M14GQZPHe7nJDIMlOULGlGLM4paXZMqt_A8tHWI"
+      },
+      "refreshToken": {
+        "type": "string",
+        "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6InJ0LUpXVCJ9.eyJpYXQiOjE2NjU5NDM5NzYsImV4cCI6MTY2NjU0ODc3NiwiYXVkIjoiYXBpLXVybCIsImlzcyI6IkJlYWNoRm9yZWNhc3QuQVBJIiwic3ViIjoiYjI4N2EwMDEtNDRkZi00MDU4LWI4MGItNGE5MjY0ODdjODBkIn0.6YemGQRpshakuCENRFsJT8bpZeKnVprQpIloN6WiOtQ"
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/id"
+          },
+          "username": {
+            "$ref": "#/components/schemas/username"
+          },
+          "email": {
+            "$ref": "#/components/schemas/email"
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/createdAt"
+          }
+        }
+      },
+      "name": {
+        "type": "string",
+        "description": "Beach name",
+        "example": "Copacabana"
+      },
+      "latitude": {
+        "type": "number",
+        "description": "Represents the latitude of the beach.",
+        "example": -22.9461
+      },
+      "longitude": {
+        "type": "number",
+        "description": "Represents the longitude of the beach.",
+        "example": -43.1811
+      },
+      "position": {
+        "type": "string",
+        "description": "Determines the direction of the beach. The cardinal points supported by the api are: north, south, east and west.",
+        "enum": [
+          "N",
+          "S",
+          "E",
+          "W"
+        ],
+        "example": "S"
+      },
+      "Beach": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/id"
+              },
+              {
+                "example": "123e4567-e89b-12d3-a456-426614174000"
+              }
+            ]
+          },
+          "name": {
+            "$ref": "#/components/schemas/name"
+          },
+          "lat": {
+            "$ref": "#/components/schemas/latitude"
+          },
+          "lng": {
+            "$ref": "#/components/schemas/longitude"
+          },
+          "position": {
+            "$ref": "#/components/schemas/position"
+          },
+          "userId": {
+            "$ref": "#/components/schemas/id"
+          }
+        }
+      },
+      "time": {
+        "type": "string",
+        "example": "2022-10-22T15:16:55.493Z"
+      },
+      "BeachForecast": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "$ref": "#/components/schemas/name"
+            },
+            "lat": {
+              "$ref": "#/components/schemas/latitude"
+            },
+            "lng": {
+              "$ref": "#/components/schemas/longitude"
+            },
+            "position": {
+              "$ref": "#/components/schemas/position"
+            },
+            "rating": {
+              "type": "number",
+              "example": 3
+            },
+            "swellDirection": {
+              "type": "number",
+              "description": "Swell direction in degrees",
+              "example": 300
+            },
+            "swellHeight": {
+              "type": "number",
+              "description": "Swell height in meters",
+              "example": 1
+            },
+            "swellPeriod": {
+              "type": "number",
+              "description": "Swell period in seconds",
+              "example": 13.67
+            },
+            "waveDirection": {
+              "type": "number",
+              "description": "Wave direction in degrees",
+              "example": 234
+            },
+            "waveHeight": {
+              "type": "number",
+              "description": "Wave height in meters",
+              "example": 1.5
+            },
+            "windDirection": {
+              "type": "number",
+              "description": "Wind direction in degrees",
+              "example": 234
+            },
+            "windSpeed": {
+              "type": "number",
+              "description": "Wind speed in meters per second",
+              "example": 10
+            },
+            "time": {
+              "$ref": "#/components/schemas/time"
+            }
+          }
+        }
+      },
+      "Forecasts": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "time": {
+              "$ref": "#/components/schemas/time"
+            },
+            "forecast": {
+              "$ref": "#/components/schemas/BeachForecast"
+            }
+          }
+        }
+      },
+      "Error": {
+        "description": "Api Error Schema",
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "code": {
+            "type": "number"
+          },
+          "error": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "documentation": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "responses": {
+      "BeachNotFound": {
+        "description": "Occurs when the beach is not registered.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "message": "beach not found",
+              "code": 404,
+              "error": "Not Found"
+            }
+          }
+        }
+      },
+      "UserNotFound": {
+        "description": "Occurs when the user is not registered.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "message": "user not found",
+              "code": 404,
+              "error": "Not Found"
+            }
+          }
+        }
+      },
+      "AuthenticationError": {
+        "description": "Access token is missing or invalid",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "jwtExpired": {
+                "summary": "jwt expired",
+                "description": "This error is returned when the provided access token has already expired.",
+                "value": {
+                  "message": "jwt expired",
+                  "code": 401,
+                  "error": "Unauthorized"
+                }
+              },
+              "jwtIsMissing": {
+                "summary": "jwt is missing",
+                "description": "This error is returned when the provided access token is missing",
+                "value": {
+                  "message": "jwt is missing",
+                  "code": 401,
+                  "error": "Unauthorized"
+                }
+              },
+              "jwtMalformed": {
+                "summary": "jwt malformed",
+                "description": "This error is returned when the provided access token has an invalid format.",
+                "value": {
+                  "message": "jwt malformed",
+                  "code": 401,
+                  "error": "Unauthorized"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "beachId": {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "description": "beach id",
+        "schema": {
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/id"
+            },
+            {
+              "example": "123e4567-e89b-12d3-a456-426614174000"
+            }
+          ]
+        }
+      }
+    },
+    "requestBodies": {
+      "createBeach": {
+        "description": "Contains the fields needed to create or update a beach.",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "$ref": "#/components/schemas/name"
+                },
+                "lat": {
+                  "$ref": "#/components/schemas/latitude"
+                },
+                "lng": {
+                  "$ref": "#/components/schemas/longitude"
+                },
+                "position": {
+                  "$ref": "#/components/schemas/position"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "refreshToken": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
