@@ -1,0 +1,29 @@
+version: '3.9'
+
+services:
+  bfdb:
+    image: postgres
+    restart: always
+    container_name: beach-forecast-database
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: beach_forecast
+      POSTGRES_PASSWORD: beach_forecast
+    volumes:
+       - postgres:/data/postgres
+  bfcache:
+    image: redis
+    container_name: beach-forecast-cache
+    restart: always
+    command: redis-server --save 20 1 --loglevel warning --requirepass ${CACHE_PASS}
+    ports:
+      - '6379:6379'
+    volumes:
+      - cache:/data
+
+volumes:
+  postgres:
+    driver: local
+  cache:
+    driver: local

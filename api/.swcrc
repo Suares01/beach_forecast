@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json.schemastore.org/swcrc",
+  "jsc": {
+    "baseUrl": ".",
+    "paths": {
+      "@services/*": [
+        "./src/services/*"
+      ],
+      "@core/*": [
+        "./src/core/*"
+      ],
+      "@modules/*": [
+        "./src/modules/*"
+      ],
+      "@config/*": [
+        "./config/*"
+      ]
+    },
+    "parser": {
+      "syntax": "typescript",
+      "tsx": false,
+      "decorators": true,
+      "dynamicImport": false
+    },
+    "transform": {
+      "legacyDecorator": true,
+      "decoratorMetadata": true
+    },
+    "target": "es2022",
+    "preserveAllComments": false,
+    "loose": true,
+    "externalHelpers": false
+  },
+  "exclude": [".spec.ts$"],
+  "module": {
+    "type": "commonjs"
+  },
+  "env": {
+    "targets": {
+      "node": "18.12.0"
+    }
+  }
+}

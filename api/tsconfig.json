@@ -1,0 +1,56 @@
+{
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "module": "commonjs",
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@services/*": [
+        "./src/services/*"
+      ],
+      "@core/*": [
+        "./src/core/*"
+      ],
+      "@modules/*": [
+        "./src/modules/*"
+      ],
+      "@config/*": [
+        "./config/*"
+      ]
+    },
+    "rootDirs": [
+      "./src",
+      "./tests"
+    ],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/@types",
+      "./tests/@types"
+    ],
+    "outDir": "./dist",
+    "sourceMap": true,
+    "target": "ESNext",
+    "lib": [
+      "ESNext"
+    ],
+    "strict": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "removeComments": true,
+    "noImplicitReturns": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  },
+  "include": [
+    "./src/**/*.ts",
+    "./tests/**/*.ts"
+  ],
+  "exclude": [
+    "./node_modules/*",
+    "./dist"
+  ]
+}
