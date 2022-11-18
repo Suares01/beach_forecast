@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id
+  username  String   @unique
+  email     String   @unique
+  password  String
+  verified  Boolean
+  createdAt DateTime
+  updatedAt DateTime
+
+  beaches Beach[]
+  otp     OTP?
+
+  @@map("users")
+}
+
+model OTP {
+  id            String   @id
+  otp           Int
+  expiresIn     DateTime
+  isAlreadyUsed Boolean
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("otp")
+}
+
+enum Position {
+  N
+  S
+  E
+  W
+}
+
+model Beach {
+  id        String   @id
+  lat       Decimal
+  lng       Decimal
+  name      String
+  position  Position
+  createdAt DateTime
+  updatedAt DateTime
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("beaches")
+}
